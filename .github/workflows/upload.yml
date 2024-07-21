@@ -1,0 +1,64 @@
+name: "upload"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version of the app to publish."
+        required: true
+        default: ""
+        type: string
+  release:
+    types: [ published ]
+
+jobs:
+  upload-release:
+    permissions:
+      contents: read
+      checks: read
+    runs-on: "ubuntu-22.04"
+    steps:
+      - name: Checkout  # Clone git repository
+        uses: actions/checkout@v3
+
+      - name: Wait on publish
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          running-workflow-name: wait-for-check-regexp
+          check-regexp: publish-tauri.*
+
+      - name: install dependencies (ubuntu only)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: download release assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            version="${{ github.event.inputs.version }}"
+          else
+            version="${{ github.event.release.tag_name }}"
+          fi
+          
+          mkdir -p "upload/$version"
+          
+          GITHUB_TAG=$version cargo run --manifest-path src-tauri/Cargo.toml --bin ci
+
+      - uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+
+      - uses: 'google-github-actions/upload-cloud-storage@v2'
+        with:
+          path: 'upload'
+          destination: 'sonaric-releases/desktop'
+          parent: false
+          headers: |-
+            cache-control: public, max-age=300

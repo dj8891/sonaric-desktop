@@ -1,0 +1,75 @@
+{
+  "build": {
+    "beforeBuildCommand": "pnpm build",
+    "beforeDevCommand": "pnpm dev",
+    "devPath": "http://localhost:5173",
+    "distDir": "../dist",
+    "withGlobalTauri": true
+  },
+  "package": {
+    "productName": "Sonaric",
+    "version": "1.2.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "fs": {
+        "scope": [
+          "$RESOURCE/res/*"
+        ]
+      },
+      "shell": {
+        "all": false,
+        "execute": true,
+        "open": true
+      },
+      "window": {
+        "maximize": true,
+        "setSize": true
+      }
+    },
+    "bundle": {
+      "active": true,
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "identifier": "xyz.sonaric.desktop",
+      "resources": [
+        "res/*"
+      ],
+      "targets": "all"
+    },
+    "security": {
+      "csp": null,
+      "dangerousRemoteDomainIpcAccess": [
+        {
+          "domain": "localhost",
+          "enableTauriAPI": true,
+          "windows": [
+            "main"
+          ]
+        }
+      ]
+    },
+    "updater": {
+      "active": true,
+      "dialog": true,
+      "endpoints": [
+        "https://storage.googleapis.com/sonaric-releases/desktop/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEFDNUFDRUVENTMwNkU3NDkKUldSSjV3WlQ3YzVhck5WcW5IQU1sdGtlbkRxLzFuK2JQNHQ1V2ZJTS9VbWRmYjVQbDd3Vnh4K3MK"
+    },
+    "windows": [
+      {
+        "height": 600,
+        "theme": "Dark",
+        "title": "Sonaric",
+        "width": 800
+      }
+    ]
+  }
+}
